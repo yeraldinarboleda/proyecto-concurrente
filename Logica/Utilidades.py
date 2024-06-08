@@ -28,10 +28,7 @@ def calculate_scalability(speedup, num_processes):
     scalability = [s / num_processes for s in speedup]
     return scalability
 
-
-
-def save_performance_graphs(elapsed_times, output_dir):
-    """Genera y guarda las gráficas de desempeño, aceleración, eficiencia y escalabilidad"""
+def desempeño(elapsed_times, output_dir):
     plt.figure()
     plt.plot(elapsed_times)
     plt.xlabel('Paso')
@@ -40,9 +37,12 @@ def save_performance_graphs(elapsed_times, output_dir):
     plt.savefig(create_unique_filename(output_dir, 'desempeno', 'png'))
     plt.close()
 
+def save_performance_graphs(elapsed_times, output_dir, num_processes):
+    """Genera y guarda las gráficas de aceleración, eficiencia y escalabilidad"""
+    
     speedup = calculate_speedup(elapsed_times)
-    # efficiency = calculate_efficiency(speedup, num_processes)
-    # scalability = calculate_scalability(speedup, num_processes)
+    efficiency = calculate_efficiency(speedup, num_processes)
+    scalability = calculate_scalability(speedup, num_processes)
 
     plt.figure()
     plt.plot(speedup)
@@ -52,18 +52,18 @@ def save_performance_graphs(elapsed_times, output_dir):
     plt.savefig(create_unique_filename(output_dir, 'aceleracion', 'png'))
     plt.close()
 
-    # plt.figure()
-    # plt.plot(efficiency)
-    # plt.xlabel('Paso')
-    # plt.ylabel('Eficiencia')
-    # plt.title('Eficiencia')
-    # plt.savefig(create_unique_filename(output_dir, 'eficiencia', 'png'))
-    # plt.close()
+    plt.figure()
+    plt.plot(efficiency)
+    plt.xlabel('Paso')
+    plt.ylabel('Eficiencia')
+    plt.title('Eficiencia')
+    plt.savefig(create_unique_filename(output_dir, 'eficiencia', 'png'))
+    plt.close()
 
-    # plt.figure()
-    # plt.plot(scalability)
-    # plt.xlabel('Paso')
-    # plt.ylabel('Escalabilidad')
-    # plt.title('Escalabilidad')
-    # plt.savefig(create_unique_filename(output_dir, 'escalabilidad', 'png'))
-    # plt.close()
+    plt.figure()
+    plt.plot(scalability)
+    plt.xlabel('Paso')
+    plt.ylabel('Escalabilidad')
+    plt.title('Escalabilidad')
+    plt.savefig(create_unique_filename(output_dir, 'escalabilidad', 'png'))
+    plt.close()

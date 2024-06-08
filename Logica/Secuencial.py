@@ -103,7 +103,7 @@ def create_dotplot(seq1, seq2, output_dir, window_size=500, step_size=100, memor
                     print(f"Imagen intermedia guardada en {image_path}")
                     last_save_time = current_time
 
-                    util.save_performance_graphs(elapsed_times, output_dir)
+                    util.desempeño(elapsed_times, output_dir)
 
                 gc.collect()
 
