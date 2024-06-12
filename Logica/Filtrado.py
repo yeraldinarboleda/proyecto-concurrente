@@ -1,62 +1,73 @@
 import numpy as np
-from scipy.ndimage import convolve
-import matplotlib.pyplot as plt
-from PIL import Image
-import concurrent.futures
+import cv2
+from multiprocessing import Pool
 
-# Cargar la imagen
-img = Image.open('Imagenes\Secuencial\dotplot_29.png').convert('L')
-img_array = np.array(img)
+def detect_diagonals(sub_image):
+    # Convertir la subimagen a escala de grises
+    gray = cv2.cvtColor(sub_image, cv2.COLOR_BGR2GRAY)
+    # Detectar bordes
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    # Detectar líneas usando la Transformada de Hough
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=50, minLineLength=20, maxLineGap=5)
+    # Dibujar las líneas detectadas
+    if lines is not None:
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            cv2.line(sub_image, (x1, y1), (x2, y2), (0, 0, 0), 2)
+    return sub_image
 
-# Definir kernels para detectar líneas diagonales
-kernel1 = np.array([[2, -1, -1],
-                    [-1, 2, -1],
-                    [-1, -1, 2]])
+def process_image_parallel(image, num_processes):
+    # Dividir la imagen en subimágenes
+    height, width = image.shape[:2]
+    sub_height = height // num_processes
 
-kernel2 = np.array([[-1, -1, 2],
-                    [-1, 2, -1],
-                    [2, -1, -1]])
+    # Crear subimágenes considerando toda la altura
+    sub_images = [image[i * sub_height: (i + 1) * sub_height if i != num_processes - 1 else height] for i in range(num_processes)]
 
-def apply_filter(img_section, kernel):
-    return convolve(img_section, kernel)
+    # Usar multiprocessing para procesar las subimágenes en paralelo
+    with Pool(processes=num_processes) as pool:
+        processed_sub_images = pool.map(detect_diagonals, sub_images)
 
-# Dividir la imagen en secciones para procesamiento paralelo con superposición
-def split_image_with_overlap(image, num_splits, overlap):
-    sections = []
-    step = image.shape[0] // num_splits
-    for i in range(num_splits):
-        start = i * step
-        end = (i + 1) * step if i < num_splits - 1 else image.shape[0]
-        start = max(0, start - overlap)
-        end = min(image.shape[0], end + overlap)
-        sections.append(image[start:end])
-    return sections
+    # Crear una imagen en blanco para los resultados
+    result_image = np.zeros_like(image)
 
-num_splits = 4  # Número de divisiones para procesamiento paralelo
-overlap = 10    # Superposición de 10 píxeles
-image_sections = split_image_with_overlap(img_array, num_splits, overlap)
+    # Combinar las subimágenes procesadas en la imagen de resultado
+    for i, sub_image in enumerate(processed_sub_images):
+        start_row = i * sub_height
+        end_row = start_row + sub_image.shape[0]
+        result_image[start_row:end_row, :] = sub_image
 
-# Procesar las secciones de la imagen en paralelo
-filtered_sections1 = []
-filtered_sections2 = []
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    futures1 = [executor.submit(apply_filter, section, kernel1) for section in image_sections]
-    futures2 = [executor.submit(apply_filter, section, kernel2) for section in image_sections]
-    filtered_sections1 = [f.result() for f in futures1]
-    filtered_sections2 = [f.result() for f in futures2]
+    return result_image
 
-# Eliminar la superposición y combinar las secciones filtradas
-filtered_img1 = np.vstack([section[overlap:-overlap] if i not in (0, num_splits-1) else section for i, section in enumerate(filtered_sections1)])
-filtered_img2 = np.vstack([section[overlap:-overlap] if i not in (0, num_splits-1) else section for i, section in enumerate(filtered_sections2)])
+def main():
+    # Cargar la imagen del dotplot
+    #image_path = 'Imagenes\Secuencial\dotplot_1.png'
+    image_path = 'Imagenes\\empo\\dotplot_parcial_1000_1.png'
+    image = cv2.imread(image_path)
+    
+    if image is None:
+        print(f"Error: la imagen en {image_path} no se pudo cargar.")
+        return
 
-# Mostrar las imágenes filtradas
-plt.figure(figsize=(10, 10))
-plt.subplot(1, 2, 1)
-plt.imshow(filtered_img1, cmap='gray')
-plt.title('Filtered Image - Diagonal 1')
+    # Procesar la imagen
+    num_processes = 4  # Ajusta este valor según tus necesidades
+    processed_image = process_image_parallel(image, num_processes)
 
-plt.subplot(1, 2, 2)
-plt.imshow(filtered_img2, cmap='gray')
-plt.title('Filtered Image - Diagonal 2')
+    # Redimensionar la imagen para que se ajuste a la pantalla
+    screen_res = 1280, 720  # Ajusta esta resolución a la de tu pantalla
+    scale_width = screen_res[0] / processed_image.shape[1]
+    scale_height = screen_res[1] / processed_image.shape[0]
+    scale = min(scale_width, scale_height)
+    window_width = int(processed_image.shape[1] * scale)
+    window_height = int(processed_image.shape[0] * scale)
 
-plt.show()
+    cv2.namedWindow('Processed Image', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('Processed Image', window_width, window_height)
+
+    # Visualizar la imagen procesada
+    cv2.imshow('Processed Image', processed_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    main()
