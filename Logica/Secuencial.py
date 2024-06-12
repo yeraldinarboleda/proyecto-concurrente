@@ -93,7 +93,7 @@ def create_dotplot(seq1, seq2, output_dir, window_size=500, step_size=100, memor
                     print(f"Imagen intermedia guardada en {image_path}")
                     last_save_time = current_time  # Actualiza el último tiempo de guardado
 
-                gc.collect()  # Libera la memoria recolectando basura
+                gc.collect()
 
             plt.close(fig)  # Cierra la figura para liberar memoria
 
@@ -134,9 +134,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     main(args.seq1, args.seq2, args.memory_limit * 1024**3, args.max_system_memory)
-
-
-
 
     
 #EJECUTAR python Logica\Secuencial.py Archivos\E_coli.fna Archivos\Salmonella.fna
