@@ -3,6 +3,16 @@ import cv2
 from multiprocessing import Pool
 
 def detect_diagonals(sub_image):
+    """
+    Esta función detecta las diagonales en una subimagen dada.
+
+    Parámetros:
+    - sub_image: La subimagen en la que se desea detectar las diagonales.
+
+    Retorna:
+    - La subimagen con las diagonales detectadas dibujadas en ella.
+    """
+    
     # Convertir la subimagen a escala de grises
     gray = cv2.cvtColor(sub_image, cv2.COLOR_BGR2GRAY)
     # Detectar bordes
@@ -17,6 +27,17 @@ def detect_diagonals(sub_image):
     return sub_image
 
 def process_image_parallel(image, num_processes):
+    """
+    Procesa una imagen dividiéndola en subimágenes y las procesa en paralelo utilizando multiprocessing.
+
+    Args:
+        image (numpy.ndarray): La imagen a procesar.
+        num_processes (int): El número de procesos a utilizar para el procesamiento en paralelo.
+
+    Returns:
+        numpy.ndarray: La imagen resultante después de procesar las subimágenes en paralelo.
+    """
+    
     # Dividir la imagen en subimágenes
     height, width = image.shape[:2]
     sub_height = height // num_processes
@@ -42,7 +63,7 @@ def process_image_parallel(image, num_processes):
 def main():
     # Cargar la imagen del dotplot
     #image_path = 'Imagenes\Secuencial\dotplot_1.png'
-    image_path = 'Imagenes\\empo\\dotplot_parcial_1000_1.png'
+    image_path = 'Imagenes\\empo\\dotplot_parcial_1200_2.png'
     image = cv2.imread(image_path)
     
     if image is None:

@@ -5,7 +5,15 @@ import time
 import os
 import Utilidades as Util
 
+    
 def draw_dotplot(matrix, fig_name='dotplot.png'):
+    """
+    Dibuja un gráfico de puntos basado en la matriz dada.
+
+    Parámetros:
+    matrix (numpy.ndarray): La matriz que representa el gráfico de puntos.
+    fig_name (str): El nombre del archivo de salida (por defecto es 'dotplot.png').
+    """
     plt.figure(figsize=(10, 10))
     plt.imshow(matrix, cmap='Greys', aspect='auto')
     plt.ylabel("Salmonela")
@@ -14,6 +22,13 @@ def draw_dotplot(matrix, fig_name='dotplot.png'):
     plt.close()
 
 def worker(args):
+    """
+    Esta función toma una tupla de argumentos que incluye un índice 'i', una secuencia 'secuencia1' y otra secuencia 'secuencia2'.
+    Luego, crea una fila de ceros del mismo tamaño que 'secuencia2'.
+    A continuación, recorre la secuencia 'secuencia2' y si el elemento en la posición 'i' de 'secuencia1' es igual al elemento en la posición 'j' de 'secuencia2',
+    asigna el valor 1 a la posición 'j' de la fila.
+    Finalmente, devuelve la fila resultante.
+    """
     i, secuencia1, secuencia2 = args
     row = np.zeros(len(secuencia2), dtype=np.int8)
     for j in range(len(secuencia2)):
@@ -21,7 +36,19 @@ def worker(args):
             row[j] = 1
     return row
 
-def parallel_dotplot(secuencia1, secuencia2, n_cpu=mp.cpu_count(), batch_size=500): # Regulación de la cantidad de procesos a utilizar
+def parallel_dotplot(secuencia1, secuencia2, n_cpu=mp.cpu_count(), batch_size=5):
+    """
+    Calcula el dotplot de manera paralela utilizando multiprocessing.
+
+    Parámetros:
+    secuencia1 (str): La primera secuencia.
+    secuencia2 (str): La segunda secuencia.
+    n_cpu (int): El número de procesadores a utilizar (por defecto es el número de núcleos de la CPU).
+    batch_size (int): El tamaño del lote de procesamiento (por defecto es 1000).
+
+    Retorna:
+    numpy.ndarray: La matriz del dotplot resultante.
+    """
     total_steps = len(secuencia1)
     start_time = time.time()
     elapsed_times = []
@@ -68,7 +95,7 @@ def main():
     print(f"Secuencia 1: {len1} caracteres")
     print(f"Secuencia 2: {len2} caracteres")
     
-    n_proc = [1, 2, mp.cpu_count()] # Ajustar según la cantidad de núcleos de tu CPU
+    n_proc = [1, mp.cpu_count()] # Ajustar según la cantidad de núcleos de la CPU
     strong_times = []
     weak_times = []
 
