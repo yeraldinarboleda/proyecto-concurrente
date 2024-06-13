@@ -36,7 +36,7 @@ def worker(args):
             row[j] = 1
     return row
 
-def parallel_dotplot(secuencia1, secuencia2, n_cpu=mp.cpu_count(), batch_size=5):
+def parallel_dotplot(secuencia1, secuencia2, n_cpu=mp.cpu_count(), batch_size=1000):
     """
     Calcula el dotplot de manera paralela utilizando multiprocessing.
 

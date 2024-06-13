@@ -63,7 +63,7 @@ def process_image_parallel(image, num_processes):
 def main():
     # Cargar la imagen del dotplot
     #image_path = 'Imagenes\Secuencial\dotplot_1.png'
-    image_path = 'Imagenes\\empo\\dotplot_parcial_1200_2.png'
+    image_path = 'Imagenes\\Multiprocessing\\dotplot_parcial_1200_2.png'
     image = cv2.imread(image_path)
     
     if image is None:
