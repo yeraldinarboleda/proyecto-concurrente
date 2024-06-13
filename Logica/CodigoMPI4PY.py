@@ -40,6 +40,25 @@ def monitor_memory(used_bytes, max_system_percentage):
     return memory_info.rss > used_bytes or psutil.virtual_memory().percent > max_system_percentage
 
 def create_dotplot(seq1, seq2, output_dir, window_size=500, step_size=100, memory_limit=5*1024**3, max_system_memory=85):
+    """
+    Crea un dotplot a partir de dos secuencias de ADN.
+
+    Parameters:
+    - seq1 (str): La primera secuencia de ADN.
+    - seq2 (str): La segunda secuencia de ADN.
+    - output_dir (str): Directorio de salida donde se guardarán las imágenes del dotplot.
+    - window_size (int): Tamaño de la ventana deslizante para el dotplot (por defecto: 500).
+    - step_size (int): Tamaño del paso para deslizar la ventana (por defecto: 100).
+    - memory_limit (int): Límite de memoria en bytes para controlar el uso de memoria (por defecto: 5 GB).
+    - max_system_memory (int): Porcentaje máximo de memoria del sistema permitido (por defecto: 85).
+
+    Returns:
+    None
+
+    El dotplot es una representación gráfica de las similitudes entre dos secuencias de ADN. 
+    Este algoritmo utiliza la biblioteca MPI para realizar el cálculo de manera paralela en múltiples procesos.
+    El dotplot se guarda como una imagen en el directorio de salida especificado.
+    """
     len1, len2 = len(seq1), len(seq2)
     total_steps = ((len1 - window_size) // step_size + 1) * ((len2 - window_size) // step_size + 1)
     current_step = 0
