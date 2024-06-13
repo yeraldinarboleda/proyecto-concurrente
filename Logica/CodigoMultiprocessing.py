@@ -21,7 +21,7 @@ def worker(args):
             row[j] = 1
     return row
 
-def parallel_dotplot(secuencia1, secuencia2, n_cpu=mp.cpu_count(), batch_size=500): # Regulación de la cantidad de procesos a utilizar
+def parallel_dotplot(secuencia1, secuencia2, n_cpu=mp.cpu_count(), batch_size=1500): # Regulación de la cantidad de procesos a utilizar
     total_steps = len(secuencia1)
     start_time = time.time()
     elapsed_times = []
@@ -68,7 +68,8 @@ def main():
     print(f"Secuencia 1: {len1} caracteres")
     print(f"Secuencia 2: {len2} caracteres")
     
-    n_proc = [1, 2, mp.cpu_count()] # Ajustar según la cantidad de núcleos de tu CPU
+    n_proc = [1] # Ajustar según la cantidad de núcleos de tu CPU
+    #n_proc = [1, 2, mp.cpu_count()]
     strong_times = []
     weak_times = []
 
