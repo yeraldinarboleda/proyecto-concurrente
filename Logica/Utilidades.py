@@ -82,3 +82,18 @@ def estimate_remaining_time(start_time, current_step, total_steps):
     estimated_remaining_time = remaining_steps / steps_per_second
     return estimated_remaining_time
 
+# Valores de rendimiento estimados para 1, 2 y 3 núcleos
+valores = [9383112.33, 14074668.5, 28149337]
+# Número de núcleos
+bloques = [1, 2, 3]
+# Ruta de la carpeta donde se guardará la imagen
+ruta = "Imagenes/MPI4PY"
+
+# Asegúrate de que la carpeta exista
+import os
+if not os.path.exists(ruta):
+    os.makedirs(ruta)
+
+# Llamada a la función para guardar los gráficos de rendimiento
+x = save_performance_graphs(valores, ruta, bloques)
+print(x)
