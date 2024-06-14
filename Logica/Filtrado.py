@@ -2,93 +2,50 @@ import numpy as np
 import cv2
 from multiprocessing import Pool
 
-def detect_diagonals(sub_image):
+    
+def aplicar_filtro(input_matrix, output_path):
     """
-    Esta función detecta las diagonales en una subimagen dada.
+    Aplica un filtro personalizado a una matriz de entrada y guarda la imagen filtrada en la ruta de salida.
 
     Parámetros:
-    - sub_image: La subimagen en la que se desea detectar las diagonales.
+    - input_matrix: Matriz de entrada que representa una imagen.
+    - output_path: Ruta de salida donde se guardará la imagen filtrada.
 
-    Retorna:
-    - La subimagen con las diagonales detectadas dibujadas en ella.
+    El código realiza las siguientes operaciones:
+    1. Define un kernel personalizado.
+    2. Aplica el filtro 2D utilizando el kernel personalizado a la matriz de entrada.
+    3. Normaliza la matriz filtrada en el rango de 0 a 127.
+    4. Aplica un umbral a la matriz normalizada para obtener una imagen binaria.
+    5. Guarda la imagen binaria en la ruta de salida.
+    6. Muestra la imagen filtrada en una ventana.
+    7. Espera a que se presione una tecla para cerrar la ventana.
+
+    No devuelve ningún valor.
     """
     
-    # Convertir la subimagen a escala de grises
-    gray = cv2.cvtColor(sub_image, cv2.COLOR_BGR2GRAY)
-    # Detectar bordes
-    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-    # Detectar líneas usando la Transformada de Hough
-    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=50, minLineLength=20, maxLineGap=5)
-    # Dibujar las líneas detectadas
-    if lines is not None:
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
-            cv2.line(sub_image, (x1, y1), (x2, y2), (0, 0, 0), 2)
-    return sub_image
+    custom_kernel = np.array([[1, 0, 0],
+                              [0, 1, 0],
+                              [0, 0, 1]])
 
-def process_image_parallel(image, num_processes):
-    """
-    Procesa una imagen dividiéndola en subimágenes y las procesa en paralelo utilizando multiprocessing.
+    filtered_matrix = cv2.filter2D(input_matrix, -1, custom_kernel)
 
-    Args:
-        image (numpy.ndarray): La imagen a procesar.
-        num_processes (int): El número de procesos a utilizar para el procesamiento en paralelo.
+    normalized_matrix = cv2.normalize(filtered_matrix, None, 0, 127, cv2.NORM_MINMAX)
 
-    Returns:
-        numpy.ndarray: La imagen resultante después de procesar las subimágenes en paralelo.
-    """
-    
-    # Dividir la imagen en subimágenes
-    height, width = image.shape[:2]
-    sub_height = height // num_processes
+    threshold_value = 126
+    _, thresholded_matrix = cv2.threshold(normalized_matrix, threshold_value, 255, cv2.THRESH_BINARY)
 
-    # Crear subimágenes considerando toda la altura
-    sub_images = [image[i * sub_height: (i + 1) * sub_height if i != num_processes - 1 else height] for i in range(num_processes)]
-
-    # Usar multiprocessing para procesar las subimágenes en paralelo
-    with Pool(processes=num_processes) as pool:
-        processed_sub_images = pool.map(detect_diagonals, sub_images)
-
-    # Crear una imagen en blanco para los resultados
-    result_image = np.zeros_like(image)
-
-    # Combinar las subimágenes procesadas en la imagen de resultado
-    for i, sub_image in enumerate(processed_sub_images):
-        start_row = i * sub_height
-        end_row = start_row + sub_image.shape[0]
-        result_image[start_row:end_row, :] = sub_image
-
-    return result_image
-
-def main():
-    # Cargar la imagen del dotplot
-    #image_path = 'Imagenes\Secuencial\dotplot_1.png'
-    image_path = 'Imagenes\\Multiprocessing\\dotplot_parcial_1200_2.png'
-    image = cv2.imread(image_path)
-    
-    if image is None:
-        print(f"Error: la imagen en {image_path} no se pudo cargar.")
-        return
-
-    # Procesar la imagen
-    num_processes = 4  # Ajusta este valor según tus necesidades
-    processed_image = process_image_parallel(image, num_processes)
-
-    # Redimensionar la imagen para que se ajuste a la pantalla
-    screen_res = 1280, 720  # Ajusta esta resolución a la de tu pantalla
-    scale_width = screen_res[0] / processed_image.shape[1]
-    scale_height = screen_res[1] / processed_image.shape[0]
-    scale = min(scale_width, scale_height)
-    window_width = int(processed_image.shape[1] * scale)
-    window_height = int(processed_image.shape[0] * scale)
-
-    cv2.namedWindow('Processed Image', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('Processed Image', window_width, window_height)
-
-    # Visualizar la imagen procesada
-    cv2.imshow('Processed Image', processed_image)
+    cv2.imwrite(output_path, thresholded_matrix)
+    cv2.imshow('Filtered Image', thresholded_matrix)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    
+# Cargar la imagen en una matriz
+image_path = 'Imagenes\Secuencial\dotplot_17.png'  
 
-if __name__ == '__main__':
-    main()
+#image_path = 'Imagenes\Multiprocessing\dotplot_parcial_1200_2.png' 
+matrix = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)  # Cargar la imagen en escala de grises
+
+# Aplicar el filtro a la matriz
+filtered_image_path = 'Imagenes\\Secuencial\\dotplot_17_filtered.png'
+aplicar_filtro(matrix, filtered_image_path)
+
